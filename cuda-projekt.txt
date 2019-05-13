@@ -1,0 +1,10 @@
+I etap
+od g/l for na kernel i pod wzór -> TAB1
+II etap
+1. watkow tyle co miejsc w tabeli - jezeli lcs[i] == lcs[j] = v to wpisuje w odpowiadajaca komorke v, w przeciwnym przypadku -1 -> TAB2
+
+ten etap mo¿na pomin¹æ i zamiast tego w drugim etapie patrzeæ czy LCS[i] == lcs[j] a nie przepisywaæ
+
+2. od g/l lecê i patrzê czy górny (TAB2[i][j-1]) (lub lewy (TAB2[i-1][j])) ma jak¹œ wartoœæ wpisan¹ (lub tablicê ci¹gów) oraz watrosc z etapu 1 (TAB1[i][j-1]) w tej poprzedniej komórce jest o jeden mniejsza od TAB1[i][j]. Je¿eli tak to biorê i dopisujê.
+
+https://www.cs.put.poznan.pl/wandrzejewski/wp-content/uploads/gpgpu/projekty.pdf
