@@ -16,6 +16,12 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/out")
 set(CUSTOM_NVCC_BUILD true)
 
+#set(CUDA_TOOLKIT_ROOT_DIR "C:/ProgramData/NVIDIA GPU Computing Toolkit/v10.0")
+#set(CUDA_NVCC_EXECUTABLE "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/bin")
+#set(CUDA_INCLUDE_DIRS "C:/ProgramData/NVIDIA Corporation/CUDA Samples/v10.0/common/inc")
+#set(CUDA_CUDART_LIBRARY "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.0/bin")
+#
+
 find_package(CUDA QUIET REQUIRED)
 
 find_package(OpenMP)

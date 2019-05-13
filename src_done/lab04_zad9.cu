@@ -38,8 +38,8 @@ __global__ void searchForSubstring(unsigned int *inputMatrix, unsigned int *subs
     positionsMatrix[tid] = 1;
 }
 
-int dimGrid = 32;
-int dimBlock = 4;
+int dimGrid = 32;   // 32 bloki
+int dimBlock = 4;   // 4 watki na blok
 int n = dimBlock * dimGrid;
 
 int main() {
