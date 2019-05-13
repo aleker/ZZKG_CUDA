@@ -2,7 +2,7 @@
 
 set PROJECT_DIR=%~dp0
 set MS_BUILD_TOOLS=C:/Program Files (x86)/Microsoft Visual C++ Build Tools
-set CUDA_INCLUDE_DIRS=D:/Programy/nVidia/CUDA/v10.0/Samples/common/inc
+set CUDA_INCLUDE_DIRS=C:/ProgramData/NVIDIA Corporation/CUDA Samples/v10.0/common/inc
 set SRC_DIR=src
 set BUILD_DIR=out
 set VISUAL_COMPILER_VERSION=2015
