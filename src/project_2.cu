@@ -11,6 +11,10 @@ __device__ int maxValue(int value, int minValue) {
     else return value;
 }
 
+__device__ int computeTid(int columnNo, int rowNo, int columnCount) {
+    return rowNo * columnCount + columnNo;
+}
+
 __global__ void createLCS(
         unsigned char *sub_x,
         int i_count,            // column < i_count
@@ -19,8 +23,8 @@ __global__ void createLCS(
         int iterationNo,
         unsigned int *lcs_mtx
 ) {
-    int blockWidth = blockDim.x;    //64
-    int blockHeight = blockDim.y;    //64
+    int blockWidth = blockDim.x;
+    int blockHeight = blockDim.y;
     int gridColumnNo = blockIdx.x;
     int gridRowNo = blockIdx.y;
     int threadXPositionInBlock = threadIdx.x;
@@ -28,7 +32,7 @@ __global__ void createLCS(
     //
     int columnNo = gridColumnNo * blockWidth + threadXPositionInBlock;
     int rowNo = gridRowNo * blockHeight + threadYPositionInBlock;
-    int tid = rowNo * i_count + columnNo;
+    int tid = computeTid(columnNo, rowNo, i_count);
 
     if (columnNo < i_count && rowNo < j_count) {
         // round No 0
@@ -48,12 +52,12 @@ __global__ void createLCS(
                 int x_idx = columnNo - 1;
                 int y_idx = rowNo - 1;
                 if (sub_x[x_idx] == sub_y[y_idx]) {
-                    int prev_tid = (rowNo - 1) * i_count + (columnNo - 1);
+                    int prev_tid = computeTid(columnNo - 1, rowNo - 1, i_count);
                     lcs_mtx[tid] = lcs_mtx[prev_tid] + 1;
                 } else if (sub_x[x_idx] != sub_y[y_idx]) {
-                    int prev_tid_1 = (rowNo - 1) * i_count + columnNo;
-                    int prev_tid_2 = rowNo * i_count + (columnNo - 1);
-                    lcs_mtx[tid] = maxValue(lcs_mtx[prev_tid_1], lcs_mtx[prev_tid_2]);
+                    int prev_tid_up = computeTid(columnNo, rowNo - 1, i_count);
+                    int prev_tid_left = computeTid(columnNo - 1, rowNo, i_count);
+                    lcs_mtx[tid] = maxValue(lcs_mtx[prev_tid_up], lcs_mtx[prev_tid_left]);
                 }
 //                lcs_mtx[tid] = iterationNo;
             }
