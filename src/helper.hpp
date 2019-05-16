@@ -60,5 +60,3 @@ void printCharArray(int columnCount, int rowCount, thrust::host_vector<unsigned 
     }
     std::cout << "\n";
 }
-
-
