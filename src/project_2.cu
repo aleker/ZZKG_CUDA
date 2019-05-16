@@ -12,14 +12,19 @@
 
 int main() {
     // input
-    std::string X; // = "1232412";
-    std::string Y; // = "243121";
+    std::string X;
+    std::string Y;
     std::cout << "Enter first substring:\n";
     std::cin >> X;
     std::cout << "\nEnter second substring:\n";
     std::cin >> Y;
     std::cout << "\nComputing...\n";
 
+    if (X.compare("d") == 0 && Y.compare("d") == 0) {
+        X = "1232412";
+        Y = "243121";
+        std::cout << "X: " << X << ", Y: " << Y << "\n";
+    }
 
     // variables
     thrust::host_vector<unsigned char> h_sub_x(X.begin(), X.end());
@@ -140,12 +145,10 @@ int main() {
         (permutationsCount, maxChainLength, i_count, d_sub_x.data().get(), d_permutations_mtx.data().get(), d_result_chains.data().get(), d_result_count.data().get());
     h_result_count = d_result_count;
     int d_sum = thrust::reduce(d_result_count.begin(),d_result_count.end());
+    h_result_chains = d_result_chains;
 
-//    if (permutationsCount  < 20) {
-        h_result_chains = d_result_chains;
-        printCharArray(permutationsCount, maxChainLength, h_result_chains.begin(), h_result_count.begin(), "PHASE V - FILTER + RESULT");
-//    }
-    std::cout << "RESULTS COUNT:" << d_sum << "\n";
+    printCharArray(permutationsCount, maxChainLength, h_result_chains.begin(), h_result_count.begin(), "PHASE V - SEQUENCES");
+    std::cout << "SEQUENCES COUNT: " << d_sum << "\n";
 
     return 0;
 }
