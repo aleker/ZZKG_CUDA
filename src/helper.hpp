@@ -26,5 +26,22 @@ int computeBlockInRowCount(int blocksize, int matrixWidth) {
     return (matrixWidth + blocksize - 1) / blocksize;
 }
 
+void printArray(int columnCount, int rowCount, char *array) {
+    for (int i = 0; i < columnCount; i++) {
+        if (i == 0)
+            std::cout << "X_\t";
+        std::cout << i << "_\t ";
+    }
+    std::cout << "\n";
+    for (int j = 0; j < rowCount; j++) {
+        for (int i = 0; i < columnCount; i++) {
+            if (i == 0)
+                std::cout << j << "|\t";
+            std::cout << array[j * columnCount + i] << "\t ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+}
 
 

@@ -47,7 +47,7 @@ __global__ void createLCS(
                 lcs_mtx[tid] = 0;
             }
         } // remaining rounds
-        else if (rowNo > 0 && columnNo > 0 && (rowNo + columnNo == (iterationNo + 1)))  {
+        else if (columnNo > 0 && rowNo > 0 && (rowNo + columnNo == iterationNo)) {
             if ((rowNo < iterationNo && columnNo <= iterationNo) || (rowNo <= iterationNo && columnNo < iterationNo)) {
                 int x_idx = columnNo - 1;
                 int y_idx = rowNo - 1;
@@ -119,7 +119,7 @@ __global__ void computeResult(
         if (rowNo + columnNo == iterationNo)  {
             if ((rowNo < iterationNo && columnNo <= iterationNo) || (rowNo <= iterationNo && columnNo < iterationNo)) {
                 // todo
-                // result_mtx[tid] = iterationNo + 47;
+                 result_mtx[tid] = iterationNo + 47;
             }
         }
     }
@@ -203,7 +203,7 @@ int main() {
     std::cout << "\n";
 
     // PHASE III results
-    for (int i = iterationsCount; i > 0; i--) {
+    for (int i = 0; i < iterationsCount; i++) {
         int blockInRowCount = computeBlockInRowCount(blockSize, std::min(i_count, i + 1));
         int blockInColumnCount = std::min(i + 1, j_count);
         int threadsCount = blockInColumnCount * blockInRowCount * blockSize;
@@ -218,8 +218,16 @@ int main() {
 
     // Copy device -> host
     h_result_mtx = d_result_mtx;
+    for (int i = 0; i < i_count; i++) {
+        if (i == 0)
+            std::cout << "X_\t";
+        std::cout << i << "_\t ";
+    }
+    std::cout << "\n";
     for (int j = 0; j < j_count; j++) {
         for (int i = 0; i < i_count; i++) {
+            if (i == 0)
+                std::cout << j << "|\t";
             std::cout << h_result_mtx[j * i_count + i] << "\t ";
         }
         std::cout << "\n";
