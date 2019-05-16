@@ -9,6 +9,8 @@
  * or you can have 4 blocks and 512 each and so on
  */
 
+const bool printArrays = false;
+
 const int MAX_THREADS_PER_ONE_DIM_BLOCK = 512;
 const int MAX_THREADS_PER_TWO_DIM_BLOCK = 1024;
 const int BLOCKS_COUNT_PER_ONE_SM = 8;    // Each SM can run up to 8 block in parallel
@@ -27,6 +29,7 @@ int computeBlockInRowCount(int blocksize, int matrixWidth) {
 }
 
 void printArray(int columnCount, int rowCount, thrust::host_vector<unsigned int>::iterator printIterator, std::string title = "") {
+    if (!printArrays) return;
     std::cout << title << "\n";
     for (int i = 0; i < columnCount; i++) {
         if (i == 0)
@@ -45,19 +48,13 @@ void printArray(int columnCount, int rowCount, thrust::host_vector<unsigned int>
     std::cout << "\n";
 }
 
-void printCharArray(int columnCount, int rowCount, thrust::host_vector<unsigned char>::iterator printIterator, std::string title = "") {
+void printCharArray(int columnCount, int rowCount, thrust::host_vector<unsigned char>::iterator printIterator, thrust::host_vector<unsigned int>::iterator proper_col, std::string title = "") {
     std::cout << title << "\n";
     for (int i = 0; i < columnCount; i++) {
-        if (i == 0)
-            std::cout << "X_\t";
-        std::cout << i << "_\t ";
-    }
-    std::cout << "\n";
-    for (int j = 0; j < rowCount; j++) {
-        for (int i = 0; i < columnCount; i++) {
-            if (i == 0)
-                std::cout << j << "|\t";
-            std::cout << printIterator[j * columnCount + i] << "\t ";
+        if (proper_col[i] != 1) continue;
+        std::cout << " * ";
+        for (int j = 0; j < rowCount; j++) {
+            std::cout << printIterator[j * columnCount + i] << " ";
         }
         std::cout << "\n";
     }

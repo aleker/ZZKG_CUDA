@@ -5,6 +5,7 @@
 #include <thrust/device_vector.h>
 
 #include <cassert>
+#include <iostream>
 
 #include "helper.hpp"
 
@@ -164,7 +165,8 @@ __global__ void filterPermutations(
         int i_count,
         unsigned char * word_of_row,
         unsigned int *arrayWithPermutations,
-        unsigned char *result_permutations
+        unsigned char *result_permutations,
+        unsigned int *resultCount
 ) {
     int blockWidth = blockDim.x;
     int blockHeight = blockDim.y;
@@ -194,14 +196,21 @@ __global__ void filterPermutations(
             int currentTidInPermutationMtx = computeTid(columnNo, currentRowNo, i_permutationsCount);
             int currentCharId = arrayWithPermutations[currentTidInPermutationMtx];
             result_permutations[currentTidInPermutationMtx] = word_of_row[getColumnForTid(currentCharId, i_count) - 1];
+            resultCount[columnNo] = 1;
         }
     }
 }
 
 int main() {
     // input
-    std::string X = "1232412";
-    std::string Y = "243121";
+    std::string X; // = "1232412";
+    std::string Y; // = "243121";
+    std::cout << "Enter first substring:\n";
+    std::cin >> X;
+    std::cout << "\nEnter second substring:\n";
+    std::cin >> Y;
+    std::cout << "\nComputing...\n";
+
 
     // variables
     thrust::host_vector<unsigned char> h_sub_x(X.begin(), X.end());
@@ -251,7 +260,7 @@ int main() {
     printArray(i_count, j_count,  h_lcs_mtx.begin(), "PHASE I - compute LCS");
 
     const int maxChainLength = h_lcs_mtx[elementsCount - 1];
-    std::cout << "maxChainLength: " << maxChainLength << "\n\n";
+    std::cout << "MAX CHAIN LENGTH: " << maxChainLength << "\n\n";
 
     // PHASE II reduce
     int blockInRowCount = computeBlockInRowCount(blockSize, i_count);
@@ -286,7 +295,7 @@ int main() {
     // Copy device -> host
     h_result_mtx = d_result_mtx;
     printArray(maxChainLength, 2, h_elementCountArray.begin(), "founded -> permutation");
-    printArray(i_count, maxChainLength, h_result_mtx.begin(), "PHASE III - copy_if - count positions");
+    printArray(i_count, maxChainLength, h_result_mtx.begin(), "PHASE III - copy_if - DISPLAY POSITIONS");
 
     // PHASE IV - find permutations (permutationsCount x maxChainLength)
     thrust::device_vector<unsigned int> d_elementCountArray;
@@ -303,22 +312,31 @@ int main() {
     generatePermutations << < dimGrid2, blockSize >> >
                             (widthOfResult_mtx, permutationsCount, maxChainLength, d_result_mtx.data().get(), d_elementCountArray.data().get(), d_permutations_mtx.data().get());
     h_permutations_mtx = d_permutations_mtx;
-    printArray(permutationsCount, maxChainLength, h_permutations_mtx.begin(), "PHASE IV - PERMUTATIONS");
+    printArray(permutationsCount, maxChainLength, h_permutations_mtx.begin(), "PHASE IV - PERMUTATIONS OF POSITIONS");
+    std::cout << "PERMUTATIONS COUNT:" << permutationsCount << "\n";
 
     // PHASE V - filter proper chains and change to char
     thrust::host_vector<unsigned char> h_result_chains;
     thrust::device_vector<unsigned char> d_result_chains;
+    thrust::device_vector<unsigned int> d_result_count;
+    thrust::host_vector<unsigned int> h_result_count;
 
     d_result_chains.resize(permutationsCount*maxChainLength);
+    d_result_count.resize(permutationsCount);
 
     blockInRowCount = computeBlockInRowCount(blockSize, permutationsCount);
     blockInColumnCount = 1;
     dim3 dimGrid3(blockInRowCount, blockInColumnCount);
     filterPermutations << < dimGrid3, blockSize >> >
-        (permutationsCount, maxChainLength, i_count, d_sub_x.data().get(), d_permutations_mtx.data().get(), d_result_chains.data().get());
+        (permutationsCount, maxChainLength, i_count, d_sub_x.data().get(), d_permutations_mtx.data().get(), d_result_chains.data().get(), d_result_count.data().get());
+    h_result_count = d_result_count;
+    int d_sum = thrust::reduce(d_result_count.begin(),d_result_count.end());
 
-    h_result_chains = d_result_chains;
-    printCharArray(permutationsCount, maxChainLength, h_result_chains.begin(), "PHASE V - RESULT");
+//    if (permutationsCount  < 20) {
+        h_result_chains = d_result_chains;
+        printCharArray(permutationsCount, maxChainLength, h_result_chains.begin(), h_result_count.begin(), "PHASE V - FILTER + RESULT");
+//    }
+    std::cout << "RESULTS COUNT:" << d_sum << "\n";
 
     return 0;
 }
