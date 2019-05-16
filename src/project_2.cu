@@ -17,9 +17,33 @@ __device__ int computeTid(int columnNo, int rowNo, int columnCount) {
     return rowNo * columnCount + columnNo;
 }
 
+__device__ int getRowForTid(int tid, int columnCount) {
+    return tid / columnCount;
+}
+
+__device__ int getColumnForTid(int tid, int columnCount) {
+    return tid % columnCount;
+}
+
+__device__ bool possibleToGo(int currentCharTid, int nextCharTid, int columnCountOfCharArray) {
+    int currentColumn = getColumnForTid(currentCharTid, columnCountOfCharArray);
+    int nextCharColumn = getColumnForTid(nextCharTid, columnCountOfCharArray);
+    int currentRow = getRowForTid(currentCharTid, columnCountOfCharArray);
+    int nextCharRow = getRowForTid(nextCharTid, columnCountOfCharArray);
+    return nextCharColumn > currentColumn && nextCharRow > currentRow;
+}
+
 __device__ int getGroup(int perGroupCount, int columnNo) {
     return columnNo / perGroupCount;
 }
+
+struct isEqual {
+    int threshold;
+    isEqual(int thr) : threshold(thr) {};
+    __host__ __device__ bool operator()(const int x) {
+        return x == threshold;
+    }
+};
 
 __global__ void createLCS(
         unsigned char *sub_x,
@@ -131,18 +155,48 @@ __global__ void generatePermutations(
             int indexOfCharId = groupIdForThisThread % possibleValuesCountForThisRow; // index of charId in array_with_possitions
             result_permutations[tid] = array_with_possitions[computeTid(indexOfCharId, rowNo, i_array_with_possitions)];
         }
-//        result_permutations[tid] = possibleValuesCountForThisRow;
     }
 }
 
+__global__ void filterPermutations(
+        int i_permutationsCount,            // column < i_count
+        int j_maxChainLength,            // row < j_count
+        int i_count,
+        unsigned char * word_of_row,
+        unsigned int *arrayWithPermutations,
+        unsigned char *result_permutations
+) {
+    int blockWidth = blockDim.x;
+    int blockHeight = blockDim.y;
+    int gridColumnNo = blockIdx.x;
+    int gridRowNo = blockIdx.y;
+    int threadXPositionInBlock = threadIdx.x;
+    int threadYPositionInBlock = threadIdx.y;
+    //
+    int columnNo = gridColumnNo * blockWidth + threadXPositionInBlock;
+    int rowNo = gridRowNo * blockHeight + threadYPositionInBlock;
+    int tid = computeTid(columnNo, rowNo, i_permutationsCount);
 
-struct isEqual {
-    int threshold;
-    isEqual(int thr) : threshold(thr) {};
-    __host__ __device__ bool operator()(const int x) {
-        return x == threshold;
+    if (columnNo < i_permutationsCount && rowNo < j_maxChainLength) {
+        if (rowNo == 0) { // one per column
+            int currentRowNo = rowNo;
+            int nextRowNo = rowNo + 1;
+            while (nextRowNo < j_maxChainLength) {
+                int currentTidInPermutationMtx = computeTid(columnNo, currentRowNo, i_permutationsCount);
+                int currentCharId = arrayWithPermutations[currentTidInPermutationMtx];
+                int nextCharId = arrayWithPermutations[computeTid(columnNo, nextRowNo, i_permutationsCount)];
+                if (possibleToGo(currentCharId, nextCharId, i_count)) {
+                    result_permutations[currentTidInPermutationMtx] = word_of_row[getColumnForTid(currentCharId, i_count) - 1];
+                } else return;
+                currentRowNo++;
+                nextRowNo++;
+            }
+            int currentTidInPermutationMtx = computeTid(columnNo, currentRowNo, i_permutationsCount);
+            int currentCharId = arrayWithPermutations[currentTidInPermutationMtx];
+            result_permutations[currentTidInPermutationMtx] = word_of_row[getColumnForTid(currentCharId, i_count) - 1];
+        }
     }
-};
+}
 
 int main() {
     // input
@@ -251,8 +305,20 @@ int main() {
     h_permutations_mtx = d_permutations_mtx;
     printArray(permutationsCount, maxChainLength, h_permutations_mtx.begin(), "PHASE IV - PERMUTATIONS");
 
-    // PHASE V
-    // todo
+    // PHASE V - filter proper chains and change to char
+    thrust::host_vector<unsigned char> h_result_chains;
+    thrust::device_vector<unsigned char> d_result_chains;
+
+    d_result_chains.resize(permutationsCount*maxChainLength);
+
+    blockInRowCount = computeBlockInRowCount(blockSize, permutationsCount);
+    blockInColumnCount = 1;
+    dim3 dimGrid3(blockInRowCount, blockInColumnCount);
+    filterPermutations << < dimGrid3, blockSize >> >
+        (permutationsCount, maxChainLength, i_count, d_sub_x.data().get(), d_permutations_mtx.data().get(), d_result_chains.data().get());
+
+    h_result_chains = d_result_chains;
+    printCharArray(permutationsCount, maxChainLength, h_result_chains.begin(), "PHASE V - RESULT");
 
     return 0;
 }

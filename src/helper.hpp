@@ -45,4 +45,23 @@ void printArray(int columnCount, int rowCount, thrust::host_vector<unsigned int>
     std::cout << "\n";
 }
 
+void printCharArray(int columnCount, int rowCount, thrust::host_vector<unsigned char>::iterator printIterator, std::string title = "") {
+    std::cout << title << "\n";
+    for (int i = 0; i < columnCount; i++) {
+        if (i == 0)
+            std::cout << "X_\t";
+        std::cout << i << "_\t ";
+    }
+    std::cout << "\n";
+    for (int j = 0; j < rowCount; j++) {
+        for (int i = 0; i < columnCount; i++) {
+            if (i == 0)
+                std::cout << j << "|\t";
+            std::cout << printIterator[j * columnCount + i] << "\t ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+}
+
 
