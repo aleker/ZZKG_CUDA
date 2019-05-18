@@ -28,8 +28,9 @@ int computeBlockInRowCount(int blocksize, int matrixWidth) {
     return (matrixWidth + blocksize - 1) / blocksize;
 }
 
-void printArray(int columnCount, int rowCount, thrust::host_vector<unsigned int>::iterator printIterator, std::string title = "") {
-    if (!printArrays) return;
+void printArray(int columnCount, int rowCount, thrust::host_vector<unsigned int>::iterator printIterator, std::string title = "",
+                bool force = false) {
+    if (!printArrays && !force) return;
     std::cout << title << "\n";
     for (int i = 0; i < columnCount; i++) {
         if (i == 0)
@@ -52,7 +53,6 @@ void printCharArray(int columnCount, int rowCount, thrust::host_vector<unsigned 
     std::cout << title << "\n";
     for (int i = 0; i < columnCount; i++) {
         if (proper_col[i] != 1) continue;
-        std::cout << " * ";
         for (int j = 0; j < rowCount; j++) {
             std::cout << printIterator[j * columnCount + i] << " ";
         }

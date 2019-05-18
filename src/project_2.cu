@@ -21,8 +21,10 @@ int main() {
     std::cout << "\nComputing...\n";
 
     if (X.compare("d") == 0 && Y.compare("d") == 0) {
-        X = "1232412";
-        Y = "243121";
+//        X = "1232412";
+//        Y = "243121";
+        X = "ibevngtoishgjirnvehugvhguthglrshgjnutrigu5498yt98h48ughruohgorhtguhrhtgourhsgt8gyhsrigh";
+        Y = "hgh9e84htufehsfoerhughrshguhtohoshgioheroighrtuohguethguheuihguerhguherhferhguerhgse8yf8iheuifherhg";
         std::cout << "X: " << X << ", Y: " << Y << "\n";
     }
 
@@ -91,7 +93,7 @@ int main() {
     // PHASE III collect ids of found elements
     d_result_mtx.resize(i_count * maxChainLength);
     thrust::host_vector<unsigned int> h_elementCountArray(maxChainLength * 2);
-    int permutationsCount = 1;
+    unsigned long long int permutationsCount = 1;
     for (int i = 0; i < maxChainLength; i++) {
         thrust::device_vector<unsigned int>::iterator d_b_newend = thrust::copy_if(thrust::make_counting_iterator(0),
                                                                                    thrust::make_counting_iterator(elementsCount),
@@ -103,7 +105,7 @@ int main() {
         permutationsCount *= foundCount;
         assert(permutationsCount != 0);
         h_elementCountArray[i + maxChainLength] = permutationsCount;
-        std::cout << (i + 1) << ": Found " << foundCount << " elements.\n";
+        std::cout << (i + 1) << ": Found " << foundCount << " elements. Permutations = " << permutationsCount << ".\n";
     }
 
     // Copy device -> host
