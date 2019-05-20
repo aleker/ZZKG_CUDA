@@ -11,6 +11,8 @@
 #include "kernels.hpp"
 
 int main() {
+    std::cout << "1- display, 0 - not display\n";
+    std::cin >> printArrays;
     // input
     std::string X;
     std::string Y;
@@ -21,10 +23,8 @@ int main() {
     std::cout << "\nComputing...\n";
 
     if (X.compare("d") == 0 && Y.compare("d") == 0) {
-//        X = "1232412";
-//        Y = "243121";
-        X = "ibevngtoishgjirnvehugvhguthglrshgjnutrigu5498yt98h48ughruohgorhtguhrhtgourhsgt8gyhsrigh";
-        Y = "hgh9e84htufehsfoerhughrshguhtohoshgioheroighrtuohguethguheuihguerhguherhferhguerhgse8yf8iheuifherhg";
+        X = "1232412";
+        Y = "243121";
         std::cout << "X: " << X << ", Y: " << Y << "\n";
     }
 

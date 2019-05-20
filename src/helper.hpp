@@ -9,7 +9,7 @@
  * or you can have 4 blocks and 512 each and so on
  */
 
-const bool printArrays = false;
+bool printArrays = true;
 
 const int MAX_THREADS_PER_ONE_DIM_BLOCK = 512;
 const int MAX_THREADS_PER_TWO_DIM_BLOCK = 1024;
