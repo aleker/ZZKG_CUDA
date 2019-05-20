@@ -11,14 +11,15 @@
 #include "kernels.hpp"
 
 int main() {
-    std::cout << "1- display, 0 - not display\n";
+    std::cout << "Enter: 1- display tables when computing, 0 - do not display\n";
     std::cin >> printArrays;
     // input
     std::string X;
     std::string Y;
-    std::cout << "Enter first substring:\n";
+    std::cout << "Entering 'd' ends with example strings from excersice (\"1232412\" and \"243121\").\n";
+    std::cout << "Enter first substring (or 'd'):\n";
     std::cin >> X;
-    std::cout << "\nEnter second substring:\n";
+    std::cout << "\nEnter second substring (or 'd'):\n";
     std::cin >> Y;
     std::cout << "\nComputing...\n";
 
